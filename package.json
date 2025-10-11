@@ -1,5 +1,5 @@
 {
-  "name": "template-ts-lib-polyrepo",
+  "name": "unplugin-use-minify",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,13 +7,13 @@
   "sideEffects": false,
   "license": "",
   "keywords": [],
-  "homepage": "https://github.com/sushichan044/template-ts-lib-polyrepo#readme",
+  "homepage": "https://github.com/sushichan044/unplugin-use-minify#readme",
   "bugs": {
-    "url": "https://github.com/sushichan044/template-ts-lib-polyrepo/issues"
+    "url": "https://github.com/sushichan044/unplugin-use-minify/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sushichan044/template-ts-lib-polyrepo.git"
+    "url": "git+https://github.com/sushichan044/unplugin-use-minify.git"
   },
   "author": {
     "name": "sushichan044",
@@ -28,9 +28,7 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -48,10 +46,7 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*",
-        "./*"
-      ]
+      "*": ["./dist/*", "./*"]
     }
   },
   "scripts": {

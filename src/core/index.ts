@@ -1,23 +1,43 @@
 import type { SourceMap } from "magic-string";
+import type { MinifyOptions } from "oxc-minify";
 import type { BlockStatement } from "oxc-parser";
+import type { Except } from "type-fest";
 
 import MagicString from "magic-string";
 import { minify } from "oxc-minify";
 import { parseSync, Visitor } from "oxc-parser";
 
-import type { UserMinifyOptions } from "./options";
+import { removeContained } from "./merge";
 
 type Minified = {
   code: string;
   map: SourceMap;
 };
 
+// we want to specift compress.unused = false, but it is not working due to bug.
+// so disable compress option for now.
+// TODO: enable compress option (except compress.unused) when the bug is fixed.
+/**
+ * @default
+ * ```ts
+ * {
+ *   codegen: {
+ *     removeWhitespace: true,
+ *   },
+ *   mangle: {
+ *     toplevel: false,
+ *   },
+ * }
+ * ```
+ */
+export type UserMinifyOptions = Except<
+  MinifyOptions,
+  "compress" | "module" | "sourcemap"
+>;
+
 const defaultMinifyOptions: UserMinifyOptions = {
   codegen: {
     removeWhitespace: true,
-  },
-  compress: {
-    target: "esnext",
   },
   mangle: {
     toplevel: false,
@@ -26,16 +46,12 @@ const defaultMinifyOptions: UserMinifyOptions = {
 
 export function useMinify(
   code: string,
-  minifyOptions: UserMinifyOptions | null | undefined,
+  minifyOptions: UserMinifyOptions | null | undefined = undefined,
 ): Minified {
-  const resolvedMinifyOptions = minifyOptions ?? defaultMinifyOptions;
+  const resolvedMinifyOptions: UserMinifyOptions =
+    minifyOptions ?? defaultMinifyOptions;
 
   const magicStr = new MagicString(code);
-
-  const transformer = createFunctionBlockTransformer(
-    (start, end) => code.slice(start, end),
-    resolvedMinifyOptions,
-  );
 
   const parsed = parseSync("file.tsx", code, {
     astType: "ts",
@@ -52,20 +68,53 @@ export function useMinify(
       if (!(fnBody.type === "BlockStatement")) {
         return;
       }
-
-      const replace = transformer(fnBody);
-      if (replace) {
-        replacements.push(replace);
+      if (!shouldMinifyThisBlock(fnBody)) {
+        return;
       }
+
+      const minified = minifyFunction(
+        code.slice(node.start, node.end),
+        resolvedMinifyOptions,
+      );
+      replacements.push({
+        content: minified,
+        end: node.end,
+        start: node.start,
+      });
     },
+
     FunctionDeclaration(node) {
       const fnBody = node.body;
-      if (!fnBody) return;
-
-      const replace = transformer(fnBody);
-      if (replace) {
-        replacements.push(replace);
+      if (!fnBody || !shouldMinifyThisBlock(fnBody)) {
+        return;
       }
+
+      const minified = minifyFunction(
+        code.slice(node.start, node.end),
+        resolvedMinifyOptions,
+      );
+      replacements.push({
+        content: minified,
+        end: node.end,
+        start: node.start,
+      });
+    },
+
+    FunctionExpression(node) {
+      const fnBody = node.body;
+      if (!fnBody || !shouldMinifyThisBlock(fnBody)) {
+        return;
+      }
+
+      const minified = minifyFunction(
+        code.slice(node.start, node.end),
+        resolvedMinifyOptions,
+      );
+      replacements.push({
+        content: minified,
+        end: node.end,
+        start: node.start,
+      });
     },
   });
   visitor.visit(parsed.program);
@@ -78,34 +127,26 @@ export function useMinify(
   };
 }
 
-function applyTextReplacements(
-  source: string,
-  replacements: TextReplaceMent[],
+function shouldMinifyThisBlock(fnBody: BlockStatement): boolean {
+  const bodyHead = fnBody.body[0];
+  return (
+    bodyHead != null &&
+    bodyHead.type === "ExpressionStatement" &&
+    bodyHead.expression.type === "Literal" &&
+    bodyHead.expression.value === "use minify"
+  );
+}
+
+function minifyFunction(
+  code: string,
+  minifyOptions: UserMinifyOptions,
 ): string {
-  if (replacements.length === 0) {
-    return source;
-  }
-  const magicString = new MagicString(source);
-
-  // Apply small replacements first to avoid errors in overlapping ranges
-  const bottomUpReplacements = replacements.sort((a, b) => {
-    const lengthA = a.end - a.start;
-    const lengthB = b.end - b.start;
-
-    if (lengthA !== lengthB) {
-      // Smaller ranges first for bottom-up application
-      return lengthA - lengthB;
-    }
-
-    // Apply from end to start
-    return b.start - a.start;
+  const minified = minify("file.tsx", code, {
+    ...minifyOptions,
+    compress: false, // see UserMinifyOptions comment
   });
 
-  for (const { content, end, start } of bottomUpReplacements) {
-    magicString.overwrite(start, end, content);
-  }
-
-  return magicString.toString();
+  return minified.code;
 }
 
 type TextReplaceMent = {
@@ -114,28 +155,20 @@ type TextReplaceMent = {
   start: number;
 };
 
-function createFunctionBlockTransformer(
-  getSourceCode: (start: number, end: number) => string,
-  minifyOptions: UserMinifyOptions,
-) {
-  return (functionBody: BlockStatement): TextReplaceMent | undefined => {
-    const bodyHead = functionBody.body[0];
-    if (
-      !bodyHead ||
-      bodyHead.type !== "ExpressionStatement" ||
-      bodyHead.expression.type !== "Literal" ||
-      bodyHead.expression.value !== "use minify"
-    )
-      return;
+function applyTextReplacements(
+  source: string,
+  replacements: TextReplaceMent[],
+): string {
+  if (replacements.length === 0) {
+    return source;
+  }
 
-    const bodySrc = getSourceCode(functionBody.start, functionBody.end);
+  const stableReplacements = removeContained(replacements);
+  const magicString = new MagicString(source);
 
-    const minified = minify("file.tsx", bodySrc, minifyOptions);
+  for (const { content, end, start } of stableReplacements) {
+    magicString.overwrite(start, end, content);
+  }
 
-    return {
-      content: minified.code,
-      end: functionBody.end,
-      start: functionBody.start,
-    };
-  };
+  return magicString.toString();
 }

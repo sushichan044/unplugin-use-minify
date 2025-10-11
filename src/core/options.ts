@@ -1,6 +1,6 @@
-import type { MinifyOptions } from "oxc-minify";
-import type { Except } from "type-fest";
 import type { FilterPattern } from "unplugin-utils";
+
+import type { UserMinifyOptions } from "../core";
 
 export interface Options {
   enforce?: "post" | "pre" | undefined;
@@ -9,8 +9,6 @@ export interface Options {
 
   minifyOptions?: UserMinifyOptions | null | undefined;
 }
-
-export type UserMinifyOptions = Except<MinifyOptions, "module">;
 
 type Overwrite<T, U> = Pick<T, Exclude<keyof T, keyof U>> & U;
 
