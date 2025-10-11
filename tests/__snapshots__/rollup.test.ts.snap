@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rollup > basic.ts 1`] = `
+"// basic.js
+function calculateUserScore(baseScore) {let e=2,t=50;return console.log(\`Calculating user score...\`),baseScore*2+50}
+const processUserData = (userData) => {let e=userData.firstName,t=userData.lastName,n=userData.age,r=e+\` \`+t;return n>=18?(console.log(\`Adult user:\`,r),{fullName:r,isAdult:!0}):(console.log(\`Minor user:\`,r),{fullName:r,isAdult:!1})};
+const formatMessage = (messageType, messageContent) => {let e=\`[Message]\`,t=\` - \`,n=Date.now(),r=\`[Message] - \`+messageType+\` - \`+messageContent;return console.log(\`Timestamp:\`,n),console.log(\`Formatted:\`,r),{message:r,timestamp:n,type:messageType}};
+// Unminified function for control comparison
+function normalFunction() {
+    const someVariable = "this will not be minified";
+    const anotherVariable = "neither will this";
+    console.log(someVariable);
+    console.log(anotherVariable);
+    return someVariable + " " + anotherVariable;
+}
+// Async function declaration with "use minify"
+async function fetchUserData(userId) {let e=\`https://api.example.com/users/\`,t=\`https://api.example.com/users/\`+userId;return console.log(\`Fetching user data from:\`,t),await(await fetch(t)).json()}
+// Async arrow function with "use minify"
+const processAsyncData = async (data) => {let e=\`processed-\`,t=[];console.log(\`Processing data...\`);for(let e of data){let n=\`processed-\`+e;t.push(n),await new Promise(e=>setTimeout(e,10));}return console.log(\`Processing complete\`),t};
+// Nested function with "use minify" on inner function
+function outerFunction(value) {let e=100,t=value*100;console.log(\`Outer function processing\`);function n(e){"use minify";let t=10,n=e+10;return console.log(\`Inner function processing\`),n}return n(t)}
+// Arrow function with implicit return (no BlockStatement)
+// This should NOT be minified as it lacks BlockStatement
+const implicitReturnArrow = (x) => x * 2;
+// Function expression with "use minify"
+// Note: Currently not handled by Visitor (only FunctionDeclaration and ArrowFunctionExpression)
+// This should NOT be minified unless Visitor is updated
+const functionExpression = function (value) {
+    "use minify";
+    const multiplier = 5;
+    const offset = 20;
+    console.log("Function expression processing");
+    const result = value * multiplier + offset;
+    return result;
+};
+
+export { calculateUserScore, fetchUserData, formatMessage, functionExpression, implicitReturnArrow, normalFunction, outerFunction, processAsyncData, processUserData };
+"
+`;

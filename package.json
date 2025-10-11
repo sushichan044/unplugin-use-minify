@@ -1,0 +1,97 @@
+{
+  "name": "template-ts-lib-polyrepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "",
+  "sideEffects": false,
+  "license": "",
+  "keywords": [],
+  "homepage": "https://github.com/sushichan044/template-ts-lib-polyrepo#readme",
+  "bugs": {
+    "url": "https://github.com/sushichan044/template-ts-lib-polyrepo/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sushichan044/template-ts-lib-polyrepo.git"
+  },
+  "author": {
+    "name": "sushichan044",
+    "url": "https://github.com/sushichan044"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "funding": "https://github.com/sponsors/sushichan044",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./vite": "./dist/vite.js",
+    "./webpack": "./dist/webpack.js",
+    "./rspack": "./dist/rspack.js",
+    "./rollup": "./dist/rollup.js",
+    "./rolldown": "./dist/rolldown.js",
+    "./esbuild": "./dist/esbuild.js",
+    "./farm": "./dist/farm.js",
+    "./api": "./dist/api.js",
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings 0 --fix .",
+    "format": "biome format --write .",
+    "format:check": "biome format . --reporter=github",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "build": "tsdown",
+    "prepublishOnly": "pnpm run build",
+    "pkg-pr-new": "pkg-pr-new publish --compact --comment=update --pnpm"
+  },
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@arethetypeswrong/core": "0.18.2",
+    "@biomejs/biome": "latest",
+    "@rollup/plugin-typescript": "12.1.4",
+    "@sxzz/test-utils": "0.5.11",
+    "@types/node": "24.7.2",
+    "@virtual-live-lab/eslint-config": "2.3.1",
+    "@virtual-live-lab/tsconfig": "2.1.21",
+    "eslint": "9.37.0",
+    "eslint-plugin-import-access": "3.0.0",
+    "pkg-pr-new": "0.0.60",
+    "publint": "0.3.14",
+    "release-it": "19.0.5",
+    "release-it-pnpm": "4.6.6",
+    "tsdown": "0.15.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.0",
+    "unplugin-unused": "0.5.4",
+    "vite": "7.1.9",
+    "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "magic-string": "0.30.19",
+    "oxc-minify": "0.94.0",
+    "oxc-parser": "0.94.0",
+    "type-fest": "5.0.1",
+    "unplugin": "2.3.10",
+    "unplugin-utils": "0.3.1"
+  }
+}

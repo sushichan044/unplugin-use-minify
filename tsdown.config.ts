@@ -1,0 +1,19 @@
+import { defineConfig } from "tsdown";
+
+export default defineConfig({
+  attw: { profile: "esmOnly" },
+  clean: true,
+  dts: {
+    resolve: ["type-fest"],
+  },
+  entry: ["./src/*.ts"],
+  format: "esm",
+  fromVite: true,
+  minify: "dce-only",
+  nodeProtocol: true,
+  outDir: "dist",
+  publint: true,
+  sourcemap: false,
+  treeshake: true,
+  unused: true,
+});
