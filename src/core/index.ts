@@ -132,8 +132,7 @@ function shouldMinifyThisBlock(fnBody: BlockStatement): boolean {
   return (
     bodyHead != null &&
     bodyHead.type === "ExpressionStatement" &&
-    bodyHead.expression.type === "Literal" &&
-    bodyHead.expression.value === "use minify"
+    bodyHead.directive === "use minify"
   );
 }
 
